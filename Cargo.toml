@@ -1,0 +1,6 @@
+[package]
+name = "mime_apps"
+version = "0.1.0"
+authors = ["Manos Pitsidianakis <el13635@mail.ntua.gr>"]
+
+[dependencies]
