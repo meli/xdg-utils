@@ -4,6 +4,7 @@ use std::fs;
 use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
 use std::str;
 
 /// Returns the path of a binary that is the default application of MIME type `query`
@@ -265,4 +266,32 @@ fn desktop_file_to_binary(
     }
 
     Err(())
+}
+
+/** Returns the MIME type of given file
+ ** https://cgit.freedesktop.org/xdg/xdg-utils/tree/scripts/xdg-mime.in */
+pub fn query_mime_info<T: AsRef<str>>(query: T) -> Result<Vec<u8>, std::io::Error> {
+    let mut command_obj = Command::new("mimetype")
+        .args(&["--brief", "--dereference", query.as_ref()])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn();
+    if command_obj.is_err() {
+        command_obj = Command::new("file")
+            .args(&["--brief", "--dereference", "--mime-type", query.as_ref()])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn();
+    }
+
+    Ok(drop_right_whitespace(
+        command_obj?.wait_with_output()?.stdout,
+    ))
+}
+
+fn drop_right_whitespace(mut vec: Vec<u8>) -> Vec<u8> {
+    while vec.last() == Some(&b'\n') {
+        vec.pop();
+    }
+    vec
 }
