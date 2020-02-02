@@ -1,6 +1,12 @@
 [package]
-name = "mime_apps"
-version = "0.2.0"
+name = "xdg-utils"
+version = "0.3.0"
 authors = ["Manos Pitsidianakis <el13635@mail.ntua.gr>"]
+description = "Query system for default apps using XDG MIME databases. Rust implementations of some common functions in the freedesktop project `xdg-utils`."
+repository = "https://github.com/meli/xdg-utils"
+readme = "README.md"
+keywords = ["mime", "xdg"]
+categories = ["os::unix-apis", "filesystem"]
+license = "GPL-3.0-or-later"
 
 [dependencies]
