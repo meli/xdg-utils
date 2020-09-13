@@ -1,5 +1,7 @@
 # xdg-utils
 
+[![GitHub license](https://img.shields.io/github/license/meli/xdg-utils)](https://github.com/meli/xdg-utils/blob/master/COPYING) [![Crates.io](https://img.shields.io/crates/v/xdg-utils)](https://crates.io/crates/xdg-utils) [![docs.rs](https://docs.rs/xdg-utils/badge.svg)](https://docs.rs/xdg-utils)
+
 Query system for default apps using XDG MIME databases.
 
 The xdg-utils library provides dependency-free (except for `std`) Rust implementations of some common functions in the freedesktop project `xdg-utils`.
