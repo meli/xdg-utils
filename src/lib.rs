@@ -145,11 +145,11 @@ pub fn query_default_app<T: AsRef<str>>(query: T) -> Result<PathBuf> {
                     }
                 }
             }
-            let pb: PathBuf = PathBuf::from(format!("{var_value}/mimeapps.list", var_value = p));
-            if pb.exists() {
-                if let Some(ret) = check_mimeapps_list(&pb, &xdg_vars, &query)? {
-                    return Ok(ret);
-                }
+        }
+        let pb: PathBuf = PathBuf::from(format!("{var_value}/mimeapps.list", var_value = p));
+        if pb.exists() {
+            if let Some(ret) = check_mimeapps_list(&pb, &xdg_vars, &query)? {
+                return Ok(ret);
             }
         }
     }
@@ -169,14 +169,14 @@ pub fn query_default_app<T: AsRef<str>>(query: T) -> Result<PathBuf> {
                     }
                 }
             }
-            let pb: PathBuf = PathBuf::from(format!(
-                "{var_value}/applications/mimeapps.list",
-                var_value = p
-            ));
-            if pb.exists() {
-                if let Some(ret) = check_mimeapps_list(&pb, &xdg_vars, &query)? {
-                    return Ok(ret);
-                }
+        }
+        let pb: PathBuf = PathBuf::from(format!(
+            "{var_value}/applications/mimeapps.list",
+            var_value = p
+        ));
+        if pb.exists() {
+            if let Some(ret) = check_mimeapps_list(&pb, &xdg_vars, &query)? {
+                return Ok(ret);
             }
         }
     }
