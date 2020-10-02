@@ -139,7 +139,7 @@ impl Ini {
 /// // The crate author recommends firefox.
 /// assert_eq!(Ok("firefox".into()), query_default_app("text/html").map_err(|_| ()));
 /// ```
-pub fn query_default_app<T: AsRef<str>>(query: T) -> Result<PathBuf> {
+pub fn query_default_app<T: AsRef<str>>(query: T) -> Result<String> {
     // Values are directory paths separated by : in case it's more than one.
     let mut xdg_vars: HashMap<String, String> = HashMap::new();
     let env_vars: env::Vars = env::vars();
@@ -256,7 +256,7 @@ fn check_mimeapps_list<T: AsRef<str>>(
                 continue;
             }
 
-            if let Some(b) = desktop_file_to_binary(v, xdg_vars)? {
+            if let Some(b) = desktop_file_to_command(v, xdg_vars)? {
                 return Ok(Some(b));
             }
         }
@@ -267,10 +267,10 @@ fn check_mimeapps_list<T: AsRef<str>>(
 
 // Find the desktop file in the filesystem, then find the binary it uses from its "Exec=..." line
 // entry.
-fn desktop_file_to_binary(
+fn desktop_file_to_command(
     desktop_name: &str,
     xdg_vars: &HashMap<String, String>,
-) -> Result<Option<PathBuf>> {
+) -> Result<Option<String>> {
     for dir in split_and_chain!(xdg_vars["XDG_DATA_HOME"], xdg_vars["XDG_DATA_DIRS"]) {
         let mut file_path: Option<PathBuf> = None;
         let mut p;
@@ -324,20 +324,12 @@ fn desktop_file_to_binary(
             }
         }
         if let Some(file_path) = file_path {
-            let mut f = fs::File::open(&file_path)?;
-            let mut buf = vec![];
-            f.read_to_end(&mut buf)?;
-            let buf =
-                str::from_utf8(&buf).map_err(|err| Error::new(ErrorKind::InvalidData, err))?;
-            for l in buf.lines() {
-                if l.starts_with("Exec") {
-                    return Ok(l
-                        .split('=')
-                        .collect::<Vec<&str>>()
-                        .get(1)
-                        .map(|l| l.split(' ').collect::<Vec<&str>>())
-                        .and_then(|l| l.get(0).map(PathBuf::from)));
+            let ini = Ini::from_filename(&file_path)?;
+            for (key, value) in ini.iter_section("Desktop Entry") {
+                if key != "Exec" {
+                    continue;
                 }
+                return Ok(Some(String::from(value)));
             }
         }
     }
