@@ -118,6 +118,10 @@ pub fn query_default_app<T: AsRef<str>>(query: T) -> Result<PathBuf> {
         );
     }
 
+    if !xdg_vars.contains_key("XDG_CONFIG_DIRS") {
+        xdg_vars.insert("XDG_CONFIG_DIRS".to_string(), "/etc/xdg".to_string());
+    }
+
     let desktops: Option<Vec<&str>> = if xdg_vars.contains_key("XDG_CURRENT_DESKTOP") {
         let list = xdg_vars["XDG_CURRENT_DESKTOP"].trim().split(':').collect();
         Some(list)
