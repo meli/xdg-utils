@@ -55,6 +55,15 @@ mod tests {
         println!("{:?}", query_default_app("video/mp4"));
         println!("{:?}", query_default_app("application/pdf"));
     }
+
+    #[test]
+    fn ini() {
+        let ini = Ini(String::from("[foo]\n# comment\nbar=baz\n\n[bar]\nbar=foo"));
+        for (key, value) in ini.iter_section("foo") {
+            assert_eq!(key, "bar");
+            assert_eq!(value, "baz");
+        }
+    }
 }
 
 use std::collections::HashMap;
@@ -73,6 +82,51 @@ macro_rules! split_and_chain {
     ($xdg_vars:ident[$key:literal], $($tail_xdg_vars:ident[$tail_key:literal]),+$(,)*) => {
 
         split_and_chain!($xdg_vars[$key]).chain(split_and_chain!($($tail_xdg_vars[$tail_key]),+))
+    }
+}
+
+struct Ini(String);
+
+impl Ini {
+    fn from_filename(filename: &Path) -> Result<Ini> {
+        let mut file: File = File::open(filename)?;
+
+        let mut contents: Vec<u8> = vec![];
+        file.read_to_end(&mut contents)?;
+
+        let contents_str =
+            String::from_utf8(contents).map_err(|err| Error::new(ErrorKind::InvalidData, err))?;
+        Ok(Ini(contents_str))
+    }
+
+    fn iter_section(&self, section: &str) -> impl Iterator<Item = (&str, &str)> {
+        let section = format!("[{}]", section);
+        let mut lines = self.0.lines();
+
+        // Eat lines until we find the beginning of our section.
+        loop {
+            let line = lines.next();
+            if let Some(line) = line {
+                if line == section {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+
+        // Then take all foo=bar lines until the next section.
+        lines
+            .filter(|line| !line.starts_with('#'))
+            .take_while(|line| !line.starts_with('['))
+            .filter_map(|line| {
+                let split: Vec<_> = line.splitn(2, '=').collect();
+                if split.len() != 2 {
+                    None
+                } else {
+                    Some((split[0], split[1]))
+                }
+            })
     }
 }
 
@@ -191,48 +245,20 @@ fn check_mimeapps_list<T: AsRef<str>>(
     filename: &Path,
     xdg_vars: &HashMap<String, String>,
     query: T,
-) -> Result<Option<PathBuf>> {
-    let mut file: File = File::open(filename)?;
-
-    let mut contents: Vec<u8> = vec![];
-    file.read_to_end(&mut contents)?;
-
-    let contents_str =
-        str::from_utf8(&contents).map_err(|err| Error::new(ErrorKind::InvalidData, err))?;
-    let idx = contents_str.find(query.as_ref());
-
-    if !contents_str.contains("[Default Applications]") || idx.is_none() {
-        return Ok(None);
-    }
-
-    let idx = idx.unwrap();
-
-    let mut end_idx = contents_str[idx..].len();
-    for (cidx, c) in (&contents_str[idx..]).chars().enumerate() {
-        if c == '\n' {
-            end_idx = cidx + idx;
-            break;
-        }
-    }
-
-    let split_idx = if let Some(p) = contents_str[idx..end_idx].find('=') {
-        p
-    } else {
-        /* Invalid data in in `filename`, but we don't want to abort the entire search for this
-         * so just return None.
-         */
-
-        return Ok(None);
-    } + idx
-        + 1;
-
-    for v in contents_str[split_idx..end_idx].split(';') {
-        if v.trim().is_empty() {
+) -> Result<Option<String>> {
+    let ini = Ini::from_filename(filename)?;
+    for (key, value) in ini.iter_section("Default Applications") {
+        if key != query.as_ref() {
             continue;
         }
+        for v in value.split(';') {
+            if v.trim().is_empty() {
+                continue;
+            }
 
-        if let Some(b) = desktop_file_to_binary(v, xdg_vars)? {
-            return Ok(Some(b));
+            if let Some(b) = desktop_file_to_binary(v, xdg_vars)? {
+                return Ok(Some(b));
+            }
         }
     }
 
