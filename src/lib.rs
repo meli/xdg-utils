@@ -264,21 +264,11 @@ fn desktop_file_to_binary(
             ));
             if p.exists() {
                 file_path = Some(p);
-            } else {
-                p = PathBuf::from(format!(
-                    "{dir}/applnk/{vendor}/{app}",
-                    dir = dir,
-                    vendor = vendor,
-                    app = app
-                ));
-                if p.exists() {
-                    file_path = Some(p);
-                }
             }
         }
 
         if file_path.is_none() {
-            'indir: for indir in &[format!("{}/applications", dir), format!("{}/applnk", dir)] {
+            'indir: for indir in &[format!("{}/applications", dir)] {
                 p = PathBuf::from(format!(
                     "{indir}/{desktop}",
                     indir = indir,
