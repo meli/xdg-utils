@@ -325,10 +325,11 @@ fn desktop_file_to_binary(
 /// # Example
 /// ```
 /// use xdg_utils::query_mime_info;
-/// assert_eq!(Ok("application/x-pie-executable".to_string()),
-///            query_mime_info("/bin/sh")
+/// let result = query_mime_info("/bin/sh")
 ///                 .map_err(|_| ())
-///                 .map(|bytes| String::from_utf8_lossy(&bytes).into_owned()));
+///                 .map(|bytes| String::from_utf8_lossy(&bytes).into_owned());
+/// let result_str = result.as_ref().map(|s| s.as_str());
+/// assert!(Ok("application/x-pie-executable") == result_str || Ok("application/x-sharedlib") == result_str)
 /// ```
 pub fn query_mime_info<T: AsRef<Path>>(query: T) -> Result<Vec<u8>> {
     let command_obj = Command::new("mimetype")
