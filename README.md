@@ -8,7 +8,7 @@ The xdg-utils library provides dependency-free (except for `std`) Rust implement
 
 
 ## What is implemented?
-* Function `query_default_app` performs like the xdg-utils function `binary_to_desktop_file`
+* Function `query_default_app` performs like the xdg-utils function `binary_to_desktop_file` but returns the command string to be executed instead of the path of the desktop file.
 * Function `query_mime_info` launches the `mimetype` or else the `file` command.
 
 Some of the utils may be implemented by combining these functions with other functions in the Rust standard library.

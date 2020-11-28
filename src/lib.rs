@@ -130,7 +130,7 @@ impl Ini {
     }
 }
 
-/// Returns the path of a binary that is the default application of given MIME type `query`
+/// Returns the command string of the desktop file that is the default application of given MIME type `query`
 ///
 /// # Example
 /// ```no_run
