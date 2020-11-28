@@ -255,7 +255,10 @@ fn check_mimeapps_list<T: AsRef<str>>(
     query: T,
 ) -> Result<Option<PathBuf>> {
     let ini = Ini::from_filename(filename)?;
-    for (key, value) in ini.iter_section("Default Applications") {
+    for (key, value) in ini
+        .iter_section("Added Associations")
+        .chain(ini.iter_section("Default Applications"))
+    {
         if key != query.as_ref() {
             continue;
         }
