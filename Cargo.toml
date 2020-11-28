@@ -1,6 +1,6 @@
 [package]
 name = "xdg-utils"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Manos Pitsidianakis <el13635@mail.ntua.gr>"]
 description = "Query system for default apps using XDG MIME databases. Rust implementations of some common functions in the freedesktop project `xdg-utils`."
 repository = "https://github.com/meli/xdg-utils"
